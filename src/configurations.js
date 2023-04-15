@@ -3,7 +3,7 @@
 
 import Joi from "joi";
 import { stripHtml } from "string-strip-html";
-import { MongoClient } from "mongodb";
+import { MongoClient , ObjectId  } from "mongodb";
 import dayjs from "dayjs";
 import dotenv from "dotenv";
 
@@ -61,6 +61,8 @@ function objConfig(parameterObj) {
 
 
 
+
+
 async function chatEntry(participant) {
 
   const { error, personalUser } = participantConfig.validate(participant);
@@ -99,4 +101,18 @@ async function chatEntry(participant) {
   }
 }
 
-export { chatEntry };
+
+async function chatParticipants() {
+
+  try {
+
+    const theParticipants = await db.collection("participants").find().toArray();
+
+    return { code: 200, data: theParticipants };
+  } catch (error) {
+
+  }
+}
+
+
+export { chatEntry , chatParticipants };
