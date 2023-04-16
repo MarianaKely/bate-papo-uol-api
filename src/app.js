@@ -82,6 +82,34 @@ async function uolAPi() {
   });
 
 
+  // Status online/offline
+
+
+  app.post("/status", async (req, res) => {
+
+    const { user } = req.headers;
+    const onlineOffline = await db.collection("participants").findOne({ name: user });
+
+    try {
+
+      if (onlineOffline) {
+
+        await db.collection("participants").updateOne({ name: user }, { $set: { lastStatus: Date.now() } });
+        return  res.sendStatus(200);
+
+      }
+
+      if (!onlineOffline) {
+
+        res.sendStatus(404);
+
+      }
+    } catch (error) {
+
+    }
+  });
+
+
   // messages
 
   app.post("/messages", async (req, res) => {
