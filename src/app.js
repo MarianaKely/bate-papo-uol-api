@@ -195,6 +195,32 @@ async function uolAPi() {
   });
 
 
+  // remove members
+
+
+  setInterval(async function offlineMembers() {
+
+    const removeMembers = await db.collection("participants").find({ lastStatus: { $lt: Date.now() - 10 * 1000 } }).toArray();
+
+    if (removeMembers.length !== 0) {
+
+      removeMembers.forEach(async (user) => {
+
+        await db.collection("participants").deleteOne({ name: user.name });
+        await db.collection("messages").insertOne({
+
+          from: user.name,
+          to: "Todos",
+          text: "sai da sala...",
+          type: "status",
+          time: dayjs(Date.now()).format("hh:mm:ss"),
+
+        });
+      });
+    }
+  }, 15 * 1000);
+
+
 
   const PORT = 5000;
 
