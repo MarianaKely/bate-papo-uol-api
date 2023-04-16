@@ -5,7 +5,7 @@ import express, { json } from 'express';
 import cors from "cors";
 import dayjs from "dayjs";
 import dotenv from "dotenv";
-import { userSchema } from "./configurations.js";
+import { userSchema , messageSchema } from "./configurations.js";
 
 dotenv.config();
 
@@ -28,6 +28,8 @@ async function uolAPi() {
   } catch (error) {
     
   }
+
+  // members
 
 
   app.post("/participants", async (req, res) => {
@@ -80,11 +82,57 @@ async function uolAPi() {
   });
 
 
+  // messages
+
+  app.post("/messages", async (req, res) => {
+
+    const { to, text, type } = req.body;
+    const from = req.headers.user;
+    const time = dayjs(Date.now()).format("hh:mm:ss");
+    const keys = messageSchema.validate({ to, text, type });
+
+    if (keys.error) {
+
+      return res.status(422).send("ERROR");
+
+    }
+
+    const personalUser = await db.collection("participants").countDocuments({ name: from });
+
+    if (personalUser === 0) {
+
+      return res.status(422).send("ERROR");
+
+    }
+
+    try {
+
+      await db.collection("messages").insertOne({
+
+        to,
+        text,
+        type,
+        from,
+        time,
+
+      });
+
+      
+      res.sendStatus(201);
+
+    } catch (error) {
+     
+      res.status(422).send("ERROR");
+
+    }
+  });
+
+
 
   const PORT = 5000;
 
   app.listen(PORT, () => { console.log(`HI, ITS ME!!!`);
-
+  
 });
 
 }
