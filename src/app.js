@@ -1,7 +1,7 @@
 
 
 import { MongoClient } from "mongodb";
-import express, { json } from 'express';
+import express, { json , query } from 'express';
 import cors from "cors";
 import dayjs from "dayjs";
 import dotenv from "dotenv";
@@ -124,6 +124,45 @@ async function uolAPi() {
      
       res.status(422).send("ERROR");
 
+    }
+  });
+
+
+  app.get("/messages", async (req, res) => {
+
+    const { mainProfile } = req.headers;
+    const { query } = req;
+    const chatConversation = await db.collection("messages").find().toArray();
+  
+    let mychatConversation = chatConversation.filter(
+  
+      (chat) => chat.user === mainProfile || chat.to === "Todos" || chat.from === mainProfile ||chat.to === mainProfile ||chat.type === "status"
+  
+    );
+  
+    try {
+      
+      if (
+
+        query && query.limit && (Number(query.limit) < 1 || isNaN(Number(query.limit)))
+  
+      ) {
+  
+        res.status(422).send("ERROR");
+        return;
+  
+      } if (query.limit) {
+  
+        res.status(200).send(mychatConversation.splice(-query.limit).reverse());
+  
+      } else {
+  
+        res.status(200).send(mychatConversation);
+  
+      }
+  
+    } catch (error) {
+  
     }
   });
 
